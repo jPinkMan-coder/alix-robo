@@ -29,47 +29,23 @@ export default function Control() {
   const agentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
 
   // ElevenLabs conversation hook
-   const conversation = useConversation({
-    onConnect: (conversationId: string) => {
-      console.log("✅ Connected to conversation", conversationId);
-      if (mountedRef.current) {
-        setIsListening(true);
-        setIsProcessing(false);
+  const conversation = useConversation({
+    onConnect: () => {
+      console.log("✅ Connected to ElevenLabs");
+      setConversationText("");
+      setAssistantResponse("");
+      setIsCommandMode(false);
+    },
+    onDisconnect: () => {
+      console.log("❌ Disconnected from ElevenLabs");
+      // Clear silence timer on disconnect
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
       }
     },
-
-    onDisconnect: (details: string) => {
-      setIsConnecting(false);
-      console.log("❌ Disconnected from conversation", details);
-      if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
-
-      if (mountedRef.current) {
-        setIsListening(false);
-        setIsProcessing(false);
-        pulseScale.value = withTiming(1);
-        waveScale.value = withTiming(1);
-      }
-    },
-
-    onError: (message: string, context?: Record<string, unknown>) => {
-      console.error("❌ Conversation error:", message, context);
-      setIsConnecting(false);
-      if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
-
-      if (mountedRef.current) {
-        setIsListening(false);
-        setIsProcessing(false);
-        pulseScale.value = withTiming(1);
-        waveScale.value = withTiming(1);
-        // Alert.alert(
-        //   "Voice Error",
-        //   "There was an issue with the voice conversation. Please try again."
-        // );
-      }
-    },
-
-    onMessage: (event: any) => {
-      setIsConnecting(false);
+     onMessage: (event: any) => {
+      
       console.log("📩 Raw event:", event);
 
       const type = event?.message?.type;
@@ -101,7 +77,7 @@ export default function Control() {
         console.log(`🪄 Corrected AI response:`, message);
         setAssistantResponse(message);
         detectCommandMode(message);
-        setIsProcessing(false);
+        
       } else {
         // fallback
         message = JSON.stringify(event);
@@ -109,30 +85,8 @@ export default function Control() {
       }
     },
 
-    onModeChange: (mode: "speaking" | "listening") => {
-      setIsConnecting(false);
-      console.log(`🔊 Mode: ${mode}`);
-      if (mountedRef.current) {
-        if (mode === "listening") {
-          setIsProcessing(false);
-          pulseScale.value = withRepeat(
-            withTiming(1.2, { duration: 800 }),
-            -1,
-            true
-          );
-        } else if (mode === "speaking") {
-          setIsProcessing(true);
-          waveScale.value = withRepeat(
-            withTiming(1.1, { duration: 600 }),
-            -1,
-            true
-          );
-        }
-      }
-    },
-
-    onStatusChange: (status: string) => {
-      console.log(`📡 Status: ${status}`);
+    onError: (error) => {
+      console.error("❌ ElevenLabs error:", error);
     },
   });
 
@@ -144,6 +98,32 @@ export default function Control() {
       }
     };
   }, []);
+
+  const commandKeywords = [
+    
+    "execute command",
+  ];
+
+   const detectCommandMode = (text: string) => {
+    if (typeof text !== "string") {
+      console.warn("Invalid text:", text);
+      return false;
+    }
+    const lowerText = text?.toLowerCase();
+    const hasCommandKeyword = commandKeywords.some((keyword) =>
+      lowerText?.includes(keyword)
+    );
+
+    if (hasCommandKeyword) {
+      setIsCommandMode(true);
+      
+    } else {
+      setIsCommandMode(false);
+      
+    }
+
+    return hasCommandKeyword;
+  };
 
   useEffect(() => {
     if (isCommandMode) {
