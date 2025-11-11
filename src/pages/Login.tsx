@@ -53,7 +53,7 @@ export default function HomeScreen() {
       if (value === "123456") {
         setShowPasswordModal(false);
         setPassword("");
-        navigate("/dashboard");
+        navigate("/control");
       } else {
         alert("Incorrect password. Please try again.");
         setPassword("");
