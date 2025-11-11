@@ -37,34 +37,7 @@ export default function Layout() {
           width: "20rem",
         }}
       >
-        <button
-          onClick={handleLogout}
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            padding: "0.75rem 1.25rem",
-            borderRadius: "1.5rem",
-            textDecoration: "none",
-            background: "transparent",
-            color: "#ef4444",
-            transition: "all 0.2s",
-            gap: "0.25rem",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "0.75rem",
-            fontWeight: 600,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-          }}
-        >
-          <LogOut size={16} />
-          <span>Logout</span>
-        </button>
+       
         <Link
           to="/control"
           style={{
