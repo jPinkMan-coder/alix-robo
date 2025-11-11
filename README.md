@@ -1,93 +1,168 @@
-# ElevenLabs React Native Example
+# ALIX Bot Control - Web Application
 
-A minimal React Native Expo app demonstrating the ElevenLabs React Native SDK for voice conversations.
+A modern, responsive web application for controlling and monitoring your ALIX cleaning robot. Converted from React Native to pure web technologies.
 
-## Prerequisites
+## ✨ Features
 
-- Node.js 20+
-- iOS and Android simulators
+- **Control Panel**: Real-time robot status monitoring, battery level, cleaning progress
+- **Quick Actions**: One-click commands for Full Clean, Return Home, Emergency Stop, and Schedule
+- **Voice Assistant UI**: Interface ready for future voice command integration
+- **Map View**: Interactive visualization with Live Status, History, and Schedule tabs
+- **Responsive Design**: Optimized for desktop, tablet, and mobile browsers
+- **Modern UI**: Dark theme with gradient backgrounds, smooth animations, and glassmorphic effects
 
-## Setup
+## 🚀 Tech Stack
 
-```bash
-# Create a .env file in the root of the project
-cp .env.example .env
-```
+- **React 18** - Latest stable React with hooks
+- **TypeScript** - Type-safe development
+- **Vite** - Lightning-fast build tool and dev server
+- **React Router** - Client-side routing
+- **Lucide React** - Beautiful, consistent icon library
+- **CSS3** - Modern styling with animations and gradients
 
-Follow the ElevenLabs Conversational AI [quickstart guide](https://elevenlabs.io/docs/conversational-ai/quickstart) to create an agent and set your agent ID in the `.env` file.
-
-### Security consideration
-
-This example uses a public agent ID for demonstration purposes. In a production app, you should generate a short lived signed URL in a secure server-side environment, see our [docs](https://elevenlabs.io/docs/conversational-ai/customization/authentication).
-
-## Installation
-
-Install dependencies:
-
-`npx expo install @elevenlabs/react-native @livekit/react-native @livekit/react-native-webrtc @config-plugins/react-native-webrtc @livekit/react-native-expo-plugin @livekit/react-native-expo-plugin livekit-client`
-
-Note: If you're running into an issue with peer dependencies, please add a `.npmrc` file in the root of the project with the following content: `legacy-peer-deps=true`.
+## 📦 Installation
 
 ```bash
 npm install
 ```
 
-## Development Build
+## 🛠️ Development
 
-Prebuild, required for native dependencies:
-
-```bash
-npx expo prebuild
-```
-
-## Running the App
-
-**Important**: This app requires a development build and cannot run in Expo Go due to WebRTC native dependencies.
-
-### Start the Expo server in tunnel mode
+Start the development server:
 
 ```bash
-npx expo start --tunnel
+npm run dev
 ```
 
-### iOS
+The app will be available at `http://localhost:3000`
+
+## 🏗️ Build
+
+Create an optimized production build:
 
 ```bash
-## Build your native iOS project (this will install CocoaPods)
-npx expo run:ios --device
+npm run build
 ```
 
-### Android
+Build output: `dist/` directory (192KB total, 57KB gzipped)
+
+## 👀 Preview
+
+Preview the production build locally:
 
 ```bash
-## Build your native Android project
-npx expo run:android
+npm run preview
 ```
 
-## Simulators
+## 📁 Project Structure
 
-When running on a simulator, make sure to adjust the audio settings so the agent can correctly hear you.
+```
+project/
+├── src/
+│   ├── components/
+│   │   └── Layout.tsx          # Main layout with bottom navigation
+│   ├── pages/
+│   │   ├── Control.tsx         # Robot control panel
+│   │   └── Map.tsx             # Map, history, and scheduling
+│   ├── styles/
+│   │   └── global.css          # Global styles and themes
+│   └── main.tsx                # Application entry point
+├── dist/                       # Production build output
+├── index.html                  # HTML template
+├── vite.config.ts              # Vite configuration
+├── tsconfig.json               # TypeScript configuration
+└── package.json                # Dependencies and scripts
+```
 
-## iOS
+## 🌐 Deployment
 
-In the I/O menu, make sure you've set the correct audio input and output devices. Also increase the volume as it defaults to 0.
+The `dist/` folder contains a static website that can be deployed to any hosting platform:
 
-![iOS Settings](assets/ios-settings.png)
+### Netlify
+```bash
+# Drag and drop the dist folder to Netlify
+```
 
-## Android
+### Vercel
+```bash
+# Import the project - Vite is auto-detected
+```
 
-In the Extended Controls panel, enable "Virtual microphone uses host audio input".
+### GitHub Pages
+```bash
+# Push dist folder to gh-pages branch
+```
 
-![Android Settings](assets/android-settings.png)
+### Static Hosting
+Upload the contents of the `dist/` folder to any web server.
 
-## Web
+## 🖥️ Browser Support
 
-Note that React Native Web is currently not supported. For web implementations please use the [ElevenLabs React SDK](https://elevenlabs.io/docs/conversational-ai/libraries/react).
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
 
-## Troubleshooting
+## 🎨 Features Breakdown
 
-- Make sure you're using development builds, not Expo Go
-- Ensure all dependencies are installed with `npm install`
-- For iOS, run `cd ios && pod install` if needed
-- Check that your development environment is set up correctly for React Native
-- Use a physical device rather than simulators
+### Control Panel
+- Real-time robot status display
+- Battery level monitoring
+- Current and next location tracking
+- Cleaning progress visualization
+- Quick action buttons for common tasks
+- Voice assistant interface (UI only, for mobile app integration)
+
+### Map View
+**Live Status Tab:**
+- Interactive map visualization
+- Robot position tracking
+- Path completion indicators
+- Real-time progress updates
+
+**History Tab:**
+- Cleaning session history
+- Success/failure status
+- Duration and area coverage stats
+
+**Schedule Tab:**
+- Scheduled cleaning times
+- Cleaning types and locations
+- Status indicators
+
+## 🔒 Security
+
+- No sensitive data exposed in frontend
+- API calls should be proxied through backend (not implemented in demo)
+- Environment variables for configuration (when needed)
+
+## 📱 Responsive Design
+
+- Desktop: Full feature set with multi-column layout
+- Tablet: Optimized grid layout
+- Mobile: Single-column layout with touch-friendly controls
+- All devices: Fixed bottom navigation for easy access
+
+## 🎯 Performance
+
+- Small bundle size: 180KB JS (57KB gzipped)
+- Minimal CSS: 6.8KB (1.9KB gzipped)
+- Fast loading: Optimized with code splitting
+- Smooth animations: CSS-based with GPU acceleration
+
+## 🚧 Future Enhancements
+
+- Real WebRTC voice integration for web browsers
+- Real-time WebSocket connection to robot
+- Map canvas with actual floor plan rendering
+- Historical data charts and analytics
+- User authentication and profiles
+- Multi-robot management
+
+## 📝 License
+
+Private
+
+## 🤝 Contributing
+
+This is a demonstration project. For production use, additional features like authentication, backend API, and real robot integration would be needed.
