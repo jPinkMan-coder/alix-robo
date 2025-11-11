@@ -110,6 +110,19 @@ export default function Control() {
     };
   }, []);
 
+  useEffect(() => {
+    if (isCommandMode) {
+      if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
+
+      silenceTimeoutRef.current = setTimeout(() => {
+        console.log(
+          "🕒 No user speech detected for 10s, ending conversation..."
+        );
+        endConversation();
+      }, 10000);
+    }
+  }, [isCommandMode]);
+
   const isListening = conversation.status === "connected";
 
   const executeCommand = () => {
