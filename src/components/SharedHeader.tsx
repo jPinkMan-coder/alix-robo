@@ -1,5 +1,6 @@
 import React from "react";
 import { Activity, Battery, Wifi } from "lucide-react";
+import image from "../assets/images/logo2.png";
 
 // Responsive breakpoints
 const getResponsiveSize = () => {
@@ -49,7 +50,16 @@ const SharedHeader = ({
       <div style={styles.headerContent as React.CSSProperties}>
         <div style={styles.logoContainer}>
           <div style={styles.logoPlaceholder}>
-            <div style={styles.logoImage}>CB</div>
+            {/* <div style={styles.logoImage}> */}
+            <img
+              src={image}
+              alt="Floor Map"
+              style={{
+                width: "80%",
+                height: "80%",
+              }}
+            />
+            {/* </div> */}
           </div>
         </div>
 
@@ -127,6 +137,7 @@ const styles = {
   logoContainer: {
     display: "flex",
     alignItems: "center",
+    justifyContent: "center",
   },
   logoPlaceholder: {
     width: scale(48),
@@ -138,12 +149,12 @@ const styles = {
     background: "linear-gradient(135deg, #ffffff, #f1f5f9)",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
   },
-  logoImage: {
-    fontSize: scale(20),
-    fontWeight: "700",
-    color: "#1e40af",
-    letterSpacing: "0.5px",
-  },
+  //   logoImage: {
+  //     fontSize: scale(20),
+  //     fontWeight: "700",
+  //     color: "#1e40af",
+  //     letterSpacing: "0.5px",
+  //   },
   logoText: {
     fontSize: scale(16),
     fontWeight: "700",
