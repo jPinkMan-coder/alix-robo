@@ -64,6 +64,16 @@ const ControlScreen = () => {
     connectionStatus: "connected",
   });
 
+  async function requestMicrophonePermission() {
+  try {
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+    return true;
+  } catch {
+    console.error("Microphone permission denied");
+    return false;
+  }
+}
+
   const resetSilenceTimeout = (duration = 20000) => {
     if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
     silenceTimeoutRef.current = setTimeout(() => {
@@ -72,64 +82,47 @@ const ControlScreen = () => {
     }, duration);
   };
 
- const conversation = useConversation({
-    onConnect: (conversationId: string) => {
+  const conversation = useConversation({
+    onConnect: (conversationId) => {
       console.log("✅ Connected to conversation", conversationId);
       if (mountedRef.current) {
         setIsListening(true);
         setIsProcessing(false);
+        setIsConnecting(false);
       }
     },
-
-    onDisconnect: (details: string) => {
+    onDisconnect: (details) => {
       setIsConnecting(false);
       console.log("❌ Disconnected from conversation", details);
       if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
-
       if (mountedRef.current) {
         setIsListening(false);
         setIsProcessing(false);
-        pulseScale.value = withTiming(1);
-        waveScale.value = withTiming(1);
       }
     },
-
-    onError: (message: string, context?: Record<string, unknown>) => {
-      console.error("❌ Conversation error:", message, context);
+    onError: (message) => {
+      console.error("❌ Conversation error:", message);
       setIsConnecting(false);
       if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
-
       if (mountedRef.current) {
         setIsListening(false);
         setIsProcessing(false);
-        pulseScale.value = withTiming(1);
-        waveScale.value = withTiming(1);
-        // Alert.alert(
-        //   "Voice Error",
-        //   "There was an issue with the voice conversation. Please try again."
-        // );
       }
     },
-
-    onMessage: (event: any) => {
+    onMessage: (event) => {
       setIsConnecting(false);
       console.log("📩 Raw event:", event);
 
       const type = event?.message?.type;
-      const source = event?.source ?? event?.role;
-
-      let message: string;
 
       if (type === "user_transcript") {
-        // user’s spoken text
-        message = event.message.user_transcription_event.user_transcript;
-        console.log(`💬 Message from user:`, message);
+        const message = event.message.user_transcription_event.user_transcript;
+        console.log("💬 Message from user:", message);
         setConversationText(message);
         resetSilenceTimeout();
       } else if (type === "agent_response") {
-        // AI’s reply
-        message = event.message.agent_response_event.agent_response;
-        console.log(`💬 Message from ai:`, message);
+        const message = event.message.agent_response_event.agent_response;
+        console.log("💬 Message from ai:", message);
         setAssistantResponse(message);
         detectCommandMode(message);
         if (detectCommandMode(message)) {
@@ -138,43 +131,27 @@ const ControlScreen = () => {
         }
         setIsProcessing(false);
       } else if (type === "agent_response_correction") {
-        message =
+        const message =
           event.message.agent_response_correction_event
             .corrected_agent_response;
-        console.log(`🪄 Corrected AI response:`, message);
+        console.log("🪄 Corrected AI response:", message);
         setAssistantResponse(message);
         detectCommandMode(message);
         setIsProcessing(false);
-      } else {
-        // fallback
-        message = JSON.stringify(event);
-        console.log(`💬 Unknown message type:`, message);
       }
     },
-
-    onModeChange: (mode: "speaking" | "listening") => {
+    onModeChange: (mode) => {
       setIsConnecting(false);
       console.log(`🔊 Mode: ${mode}`);
       if (mountedRef.current) {
         if (mode === "listening") {
           setIsProcessing(false);
-          pulseScale.value = withRepeat(
-            withTiming(1.2, { duration: 800 }),
-            -1,
-            true
-          );
         } else if (mode === "speaking") {
           setIsProcessing(true);
-          waveScale.value = withRepeat(
-            withTiming(1.1, { duration: 600 }),
-            -1,
-            true
-          );
         }
       }
     },
-
-    onStatusChange: (status: string) => {
+    onStatusChange: (status) => {
       console.log(`📡 Status: ${status}`);
     },
   });
