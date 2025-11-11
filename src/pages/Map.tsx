@@ -929,7 +929,7 @@ const styles = {
   },
   liveStatusScrollView: {
     maxHeight: scale(500),
-    overflowY: "auto",
+    overflowY: "hidden",
   },
   mapContainer: {
     display: "flex",
