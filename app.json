@@ -30,7 +30,6 @@
       "package": "com.thorelevendev.elevenlabsconversationalaiexporeactnative"
     },
     "web": {
-      "output": "static",
       "bundler": "metro"
     },
     "plugins": [],
