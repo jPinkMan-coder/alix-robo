@@ -26,29 +26,110 @@ export default function Control() {
   const agentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
 
   // ElevenLabs conversation hook
-  const conversation = useConversation({
-    onConnect: () => {
-      console.log("Connected to ElevenLabs");
+   const conversation = useConversation({
+    onConnect: (conversationId: string) => {
+      console.log("✅ Connected to conversation", conversationId);
+      if (mountedRef.current) {
+        setIsListening(true);
+        setIsProcessing(false);
+      }
     },
-    onDisconnect: () => {
-      console.log("Disconnected from ElevenLabs");
-    },
-    onMessage: (message) => {
-      console.log("Message:", message);
-      if (message.type === "user_transcript") {
-        setConversationText(message.message);
-      } else if (message.type === "agent_response") {
-        setAssistantResponse(message.message);
 
-        // Check if the message contains a command
-        const msg = message.message.toLowerCase();
-        if (msg.includes("clean") || msg.includes("start") || msg.includes("stop") || msg.includes("return")) {
-          setIsCommandMode(true);
+    onDisconnect: (details: string) => {
+      setIsConnecting(false);
+      console.log("❌ Disconnected from conversation", details);
+      if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
+
+      if (mountedRef.current) {
+        setIsListening(false);
+        setIsProcessing(false);
+        pulseScale.value = withTiming(1);
+        waveScale.value = withTiming(1);
+      }
+    },
+
+    onError: (message: string, context?: Record<string, unknown>) => {
+      console.error("❌ Conversation error:", message, context);
+      setIsConnecting(false);
+      if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
+
+      if (mountedRef.current) {
+        setIsListening(false);
+        setIsProcessing(false);
+        pulseScale.value = withTiming(1);
+        waveScale.value = withTiming(1);
+        // Alert.alert(
+        //   "Voice Error",
+        //   "There was an issue with the voice conversation. Please try again."
+        // );
+      }
+    },
+
+    onMessage: (event: any) => {
+      setIsConnecting(false);
+      console.log("📩 Raw event:", event);
+
+      const type = event?.message?.type;
+      const source = event?.source ?? event?.role;
+
+      let message: string;
+
+      if (type === "user_transcript") {
+        // user’s spoken text
+        message = event.message.user_transcription_event.user_transcript;
+        console.log(`💬 Message from user:`, message);
+        setConversationText(message);
+        resetSilenceTimeout();
+      } else if (type === "agent_response") {
+        // AI’s reply
+        message = event.message.agent_response_event.agent_response;
+        console.log(`💬 Message from ai:`, message);
+        setAssistantResponse(message);
+        detectCommandMode(message);
+        if (detectCommandMode(message)) {
+          console.log("⚙️ Command detected — will end after 10 seconds");
+          resetSilenceTimeout();
+        }
+        setIsProcessing(false);
+      } else if (type === "agent_response_correction") {
+        message =
+          event.message.agent_response_correction_event
+            .corrected_agent_response;
+        console.log(`🪄 Corrected AI response:`, message);
+        setAssistantResponse(message);
+        detectCommandMode(message);
+        setIsProcessing(false);
+      } else {
+        // fallback
+        message = JSON.stringify(event);
+        console.log(`💬 Unknown message type:`, message);
+      }
+    },
+
+    onModeChange: (mode: "speaking" | "listening") => {
+      setIsConnecting(false);
+      console.log(`🔊 Mode: ${mode}`);
+      if (mountedRef.current) {
+        if (mode === "listening") {
+          setIsProcessing(false);
+          pulseScale.value = withRepeat(
+            withTiming(1.2, { duration: 800 }),
+            -1,
+            true
+          );
+        } else if (mode === "speaking") {
+          setIsProcessing(true);
+          waveScale.value = withRepeat(
+            withTiming(1.1, { duration: 600 }),
+            -1,
+            true
+          );
         }
       }
     },
-    onError: (error) => {
-      console.error("ElevenLabs error:", error);
+
+    onStatusChange: (status: string) => {
+      console.log(`📡 Status: ${status}`);
     },
   });
 
