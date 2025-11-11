@@ -104,7 +104,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(15, 23, 42, 0.92)",
-    backdropFilter: "blur(10px)",
   },
   loaderContainer: {
     width: 80,

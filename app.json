@@ -3,15 +3,9 @@
     "name": "elevenlabs-conversational-ai-expo-react-native",
     "slug": "elevenlabs-conversational-ai-expo-react-native",
     "version": "1.0.0",
-    "orientation": "landscape",
-    "icon": "./assets/icon.png",
+    "orientation": "default",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -21,11 +15,7 @@
       "bundleIdentifier": "com.thorelevendev.elevenlabsconversationalaiexporeactnative"
     },
     "android": {
-      "orientation": "landscape",
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
+      "orientation": "default",
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.RECORD_AUDIO",
@@ -40,12 +30,10 @@
       "package": "com.thorelevendev.elevenlabsconversationalaiexporeactnative"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "output": "static",
+      "bundler": "metro"
     },
-    "plugins": [
-      "@livekit/react-native-expo-plugin",
-      "@config-plugins/react-native-webrtc"
-    ],
+    "plugins": [],
     "extra": {
       "eas": {
         "projectId": "e398d043-2b54-4dea-a02b-2330b92cac38"

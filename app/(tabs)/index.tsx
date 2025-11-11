@@ -1,9 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { Mic, MicOff, Zap } from "lucide-react-native";
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
   Dimensions,
   Platform,
   ScrollView,
@@ -20,14 +18,28 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import SharedHeader from "../../components/SharedHeader";
-import { ElevenLabsProvider, useConversation } from "@elevenlabs/react-native";
-import type {
-  ConversationStatus,
-  ConversationEvent,
-  Role,
-} from "@elevenlabs/react-native";
 
-import { AudioModule, setAudioModeAsync } from "expo-audio";
+let ElevenLabsProvider: any;
+let useConversation: any;
+
+if (Platform.OS !== 'web') {
+  try {
+    const elevenlabs = require("@elevenlabs/react-native");
+    ElevenLabsProvider = elevenlabs.ElevenLabsProvider;
+    useConversation = elevenlabs.useConversation;
+  } catch (e) {
+    console.warn('ElevenLabs native module not available');
+  }
+} else {
+  ElevenLabsProvider = ({ children }: any) => children;
+  useConversation = () => ({
+    status: 'disconnected',
+    startSession: async () => {
+      console.log('Web version: Voice features not available');
+    },
+    endSession: async () => {},
+  });
+}
 import StylishLoader from "../../components/StylishLoader";
 const { width, height } = Dimensions.get("window");
 
@@ -95,8 +107,8 @@ function ControlScreen1() {
     }, duration);
   };
 
-  // ElevenLabs conversation hook using web SDK
-  const conversation = useConversation({
+  // ElevenLabs conversation hook
+  const conversation = useConversation ? useConversation({
     onConnect: (conversationId: string) => {
       console.log("✅ Connected to conversation", conversationId);
       if (mountedRef.current) {
@@ -201,7 +213,7 @@ function ControlScreen1() {
     onStatusChange: (status: string) => {
       console.log(`📡 Status: ${status}`);
     },
-  });
+  }) : { status: 'disconnected', startSession: async () => {}, endSession: async () => {} };
 
   useEffect(() => {
     if (isCommandMode) {
@@ -424,7 +436,7 @@ function ControlScreen1() {
       clearInterval(quickActionIntervalRef.current);
 
     if (!mountedRef.current) return;
-    const actionNames = {
+    const actionNames: Record<string, string> = {
       fullClean: "Start Full Clean",
       returnToBase: "Return to Base",
       emergencyStop: "Stop",
