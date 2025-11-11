@@ -1,234 +1,183 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion, useAnimation } from "framer-motion";
-import { FaLock, FaTimes } from "react-icons/fa";
-import logo from "../assets/images/logo2.png";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { FaRobot, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 
-export default function HomeScreen() {
+export default function Login() {
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [password, setPassword] = useState("");
+  const { login } = useAuth();
 
-  const glowControls = useAnimation();
-  const shineControls = useAnimation();
-  const logoControls = useAnimation();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
-  useEffect(() => {
-    const loopGlow = async () => {
-      while (true) {
-        await glowControls.start({ opacity: 1, transition: { duration: 2.2 } });
-        await glowControls.start({ opacity: 0.4, transition: { duration: 2.2 } });
-      }
-    };
-
-    const loopShine = async () => {
-      while (true) {
-        await shineControls.start({
-          x: "150%",
-          opacity: [0, 0.8, 0],
-          transition: { duration: 1.8, ease: "easeInOut" },
-        });
-        await new Promise((r) => setTimeout(r, 3000));
-        shineControls.set({ x: "-150%" });
-      }
-    };
-
-    loopGlow();
-    loopShine();
-  }, [glowControls, shineControls]);
-
-  const handleEnterPress = () => {
-    logoControls
-      .start({
-        scale: [1, 0.95, 1],
-        transition: { duration: 0.2 },
-      })
-      .then(() => setShowPasswordModal(true));
-  };
-
-  const handlePasswordChange = (e) => {
-    const value = e.target.value;
-    setPassword(value);
-    if (value.length === 6) {
-      if (value === "123456") {
-        setShowPasswordModal(false);
-        setPassword("");
-        navigate("/control");
+    setTimeout(() => {
+      const success = login(password);
+      if (success) {
+        navigate('/control');
       } else {
-        alert("Incorrect password. Please try again.");
-        setPassword("");
+        setError('Incorrect password. Please try again.');
+        setPassword('');
       }
-    }
+      setIsLoading(false);
+    }, 800);
   };
 
   return (
-    <div
-      style={{
-        position: "relative",
-        height: "100vh",
-        overflow: "hidden",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "linear-gradient(135deg, #0f172a, #1e293b, #334155, #1e40af, #3b82f6)",
-      }}
-    >
-      {/* Logo Section */}
-      <motion.div
-        onClick={handleEnterPress}
-        animate={logoControls}
-        style={{
-          position: "relative",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-        }}
-      >
-        <div
-          style={{
-            position: "relative",
-            width: 160,
-            height: 160,
-            borderRadius: 20,
-            overflow: "hidden",
-            boxShadow: "0 0 40px rgba(59, 130, 246, 0.7)",
-            background: "linear-gradient(145deg, #0f172a, #1e3a8a, #3b82f6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <motion.img
-            src={logo}
-            alt="logo"
-            animate={glowControls}
-            style={{
-              width: 130,
-              height: 130,
-              objectFit: "contain",
-              filter: "drop-shadow(0 0 10px rgba(59, 130, 246, 0.8))",
-              zIndex: 2,
-            }}
-          />
-          <motion.div
-            animate={shineControls}
-            initial={{ x: "-150%" }}
-            style={{
-              position: "absolute",
-              top: "-50%",
-              left: 0,
-              width: 60,
-              height: "200%",
-              background: "rgba(255, 255, 255, 0.4)",
-              transform: "rotate(25deg)",
-            }}
-          />
-        </div>
-      </motion.div>
+    <div className="login-container">
+      <div className="login-background">
+        <div className="gradient-orb orb-1"></div>
+        <div className="gradient-orb orb-2"></div>
+        <div className="gradient-orb orb-3"></div>
+      </div>
 
-      {/* Password Modal */}
-      {showPasswordModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 999,
-          }}
+      <motion.div
+        className="login-card"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <motion.div
+          className="login-header"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
         >
-          <div
-            style={{
-              background: "linear-gradient(135deg, #1e293b, #334155)",
-              borderRadius: 16,
-              padding: 24,
-              maxWidth: 350,
-              width: "90%",
-              color: "#f1f5f9",
-              textAlign: "center",
-              animation: "fadeIn 0.3s ease",
+          <motion.div
+            className="robot-icon-container"
+            animate={{
+              rotate: [0, 10, -10, 0],
+              scale: [1, 1.1, 1.1, 1],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              repeatDelay: 1,
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-              }}
-            >
-              <button
-                onClick={() => setShowPasswordModal(false)}
-                style={{
-                  background: "rgba(100, 116, 139, 0.3)",
-                  border: "none",
-                  borderRadius: 6,
-                  padding: 6,
-                  cursor: "pointer",
-                  color: "#9ca3af",
-                }}
-              >
-                <FaTimes />
-              </button>
-            </div>
+            <FaRobot className="robot-icon" />
+          </motion.div>
+          <h1 className="login-title">ALIX Bot Control</h1>
+          <p className="login-subtitle">Enter password to access control panel</p>
+        </motion.div>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 12,
-                marginTop: 8,
-              }}
-            >
-              <div
-                style={{
-                  background: "linear-gradient(145deg, #374151, #4b5563)",
-                  borderRadius: "50%",
-                  width: 64,
-                  height: 64,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <FaLock size={28} color="#3b82f6" />
-              </div>
-              <p
-                style={{
-                  color: "#94a3b8",
-                  fontSize: 14,
-                  marginTop: 4,
-                }}
-              >
-                Enter 6-digit password to access CleanBot Control
-              </p>
-              <input
-                type="password"
-                maxLength={6}
-                value={password}
-                onChange={handlePasswordChange}
-                autoFocus
-                style={{
-                  background: "rgba(51, 65, 85, 0.5)",
-                  border: "1px solid rgba(148, 163, 184, 0.3)",
-                  borderRadius: 10,
-                  padding: 12,
-                  fontSize: 16,
-                  color: "#f1f5f9",
-                  textAlign: "center",
-                  letterSpacing: 6,
-                  width: "100%",
-                  outline: "none",
-                  marginTop: 4,
-                }}
-              />
+        <motion.form
+          onSubmit={handleSubmit}
+          className="login-form"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
+          <div className="input-group">
+            <div className="input-icon">
+              <FaLock />
             </div>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter 6-digit password"
+              className="password-input"
+              autoFocus
+              disabled={isLoading}
+              maxLength={6}
+            />
+            <button
+              type="button"
+              className="toggle-password"
+              onClick={() => setShowPassword(!showPassword)}
+              disabled={isLoading}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
-        </div>
-      )}
+
+          {error && (
+            <motion.div
+              className="error-message"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {error}
+            </motion.div>
+          )}
+
+          <motion.button
+            type="submit"
+            className="login-button"
+            disabled={password.length !== 6 || isLoading}
+            whileHover={{ scale: password.length === 6 && !isLoading ? 1.02 : 1 }}
+            whileTap={{ scale: password.length === 6 && !isLoading ? 0.98 : 1 }}
+          >
+            {isLoading ? (
+              <motion.div
+                className="loading-spinner"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              >
+                <FaRobot />
+              </motion.div>
+            ) : (
+              'Access Control Panel'
+            )}
+          </motion.button>
+
+          <div style={{
+            textAlign: 'center',
+            marginTop: '1rem',
+            color: '#64748b',
+            fontSize: '0.85rem'
+          }}>
+            Password: 123456
+          </div>
+        </motion.form>
+
+        <motion.div
+          className="login-footer"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+        >
+          <div className="security-badge">
+            <FaLock className="security-icon" />
+            <span>Secure Access</span>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      <motion.div
+        className="floating-particles"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8, duration: 1 }}
+      >
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [0, -30, 0],
+              opacity: [0.2, 0.5, 0.2],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 2,
+              repeat: Infinity,
+              delay: Math.random() * 2,
+            }}
+          />
+        ))}
+      </motion.div>
     </div>
   );
 }
