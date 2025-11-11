@@ -34,7 +34,7 @@ export default function Layout() {
           zIndex: 1000,
           height: "3.5rem",
           alignItems: "center",
-          width: "20rem",
+          width: "15rem",
         }}
       >
        
