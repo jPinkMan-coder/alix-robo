@@ -1,58 +1,92 @@
 # ALIX Bot Control - Web Application
 
-A modern, responsive web application for controlling and monitoring your ALIX cleaning robot. Converted from React Native to pure web technologies.
+A modern, responsive web application for controlling your ALIX cleaning robot with **ElevenLabs AI voice conversation** capabilities.
 
-## ✨ Features
+## ✨ Key Features
 
-- **Control Panel**: Real-time robot status monitoring, battery level, cleaning progress
-- **Quick Actions**: One-click commands for Full Clean, Return Home, Emergency Stop, and Schedule
-- **Voice Assistant UI**: Interface ready for future voice command integration
-- **Map View**: Interactive visualization with Live Status, History, and Schedule tabs
-- **Responsive Design**: Optimized for desktop, tablet, and mobile browsers
-- **Modern UI**: Dark theme with gradient backgrounds, smooth animations, and glassmorphic effects
+### 🎙️ Voice Assistant (NEW!)
+- **Real-time AI Conversation** powered by ElevenLabs
+- Voice-to-text transcription
+- Natural language command processing
+- Execute robot commands through voice
+- Smart command detection
 
-## 🚀 Tech Stack
+### 🤖 Robot Control
+- Real-time status monitoring
+- Battery level tracking
+- Location tracking (current & next)
+- Progress visualization
+- Quick action buttons
 
-- **React 18** - Latest stable React with hooks
-- **TypeScript** - Type-safe development
-- **Vite** - Lightning-fast build tool and dev server
-- **React Router** - Client-side routing
-- **Lucide React** - Beautiful, consistent icon library
-- **CSS3** - Modern styling with animations and gradients
+### 🗺️ Map & Tracking
+- Live robot position
+- Cleaning history with stats
+- Scheduled cleaning tasks
+- Interactive legend
 
-## 📦 Installation
+### 🎨 Modern UI
+- Dark theme with gradients
+- Smooth animations
+- Responsive design (desktop/tablet/mobile)
+- Glassmorphic effects
 
+## 🚀 Quick Start
+
+### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-## 🛠️ Development
+### 2. Configure ElevenLabs
+```bash
+# Copy environment template
+cp .env.example .env
 
-Start the development server:
+# Edit .env and add your ElevenLabs Agent ID
+VITE_ELEVENLABS_AGENT_ID=your_agent_id_here
+```
 
+Get your Agent ID from: https://elevenlabs.io/app/conversational-ai
+
+### 3. Start Development
 ```bash
 npm run dev
 ```
 
-The app will be available at `http://localhost:3000`
+Visit `http://localhost:3000`
 
-## 🏗️ Build
-
-Create an optimized production build:
-
+### 4. Build for Production
 ```bash
 npm run build
 ```
 
-Build output: `dist/` directory (192KB total, 57KB gzipped)
+Output: `dist/` folder (669KB with voice AI)
 
-## 👀 Preview
+## 📦 Tech Stack
 
-Preview the production build locally:
+- **React 18** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **ElevenLabs React SDK** - Voice AI
+- **React Router** - Navigation
+- **Lucide React** - Icons
 
-```bash
-npm run preview
-```
+## 🎯 How to Use Voice Commands
+
+1. Click the **microphone button** in the Control panel
+2. Allow microphone access when prompted
+3. **Speak naturally** to the AI assistant
+4. View transcription and AI response in real-time
+5. When AI detects a command, click **"Execute Command"**
+
+### Example Voice Commands
+
+- "Start cleaning the bathroom"
+- "Return the robot to base"
+- "Stop the current cleaning"
+- "Schedule a cleaning for tomorrow"
+
+The AI will understand natural language and detect actionable commands automatically.
 
 ## 📁 Project Structure
 
@@ -60,109 +94,133 @@ npm run preview
 project/
 ├── src/
 │   ├── components/
-│   │   └── Layout.tsx          # Main layout with bottom navigation
+│   │   └── Layout.tsx          # Navigation layout
 │   ├── pages/
-│   │   ├── Control.tsx         # Robot control panel
-│   │   └── Map.tsx             # Map, history, and scheduling
+│   │   ├── Control.tsx         # Voice control panel
+│   │   └── Map.tsx             # Map & scheduling
 │   ├── styles/
-│   │   └── global.css          # Global styles and themes
-│   └── main.tsx                # Application entry point
-├── dist/                       # Production build output
-├── index.html                  # HTML template
-├── vite.config.ts              # Vite configuration
-├── tsconfig.json               # TypeScript configuration
-└── package.json                # Dependencies and scripts
+│   │   └── global.css          # Theming & styles
+│   └── main.tsx                # App entry
+├── dist/                       # Build output
+├── .env                        # Environment config
+└── package.json                # Dependencies
 ```
 
-## 🌐 Deployment
+## 🔧 Environment Variables
 
-The `dist/` folder contains a static website that can be deployed to any hosting platform:
+```bash
+# Required for voice features
+VITE_ELEVENLABS_AGENT_ID=your_agent_id
+
+# Optional Supabase config
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_key
+```
+
+## 🌐 Browser Requirements
+
+- **Chrome** (recommended) - Best WebRTC support
+- **Firefox** - Full support
+- **Safari** - Requires HTTPS for microphone
+- **Edge** - Full support
+
+**Note:** Microphone access requires HTTPS in production (localhost works in dev).
+
+## 📊 Performance
+
+```
+Bundle Size: 669KB JS (184KB gzipped) with AI
+CSS: 7KB (2KB gzipped)
+HTML: 0.6KB
+Build Time: ~8 seconds
+```
+
+The larger bundle size includes the ElevenLabs conversational AI SDK for voice features.
+
+## 🛠️ Available Scripts
+
+```bash
+npm run dev       # Start dev server (port 3000)
+npm run build     # Production build
+npm run preview   # Preview production build
+```
+
+## 🌍 Deployment
 
 ### Netlify
 ```bash
-# Drag and drop the dist folder to Netlify
+# Build command
+npm run build
+
+# Publish directory
+dist
 ```
 
 ### Vercel
+- Import from GitHub
+- Framework: Vite
+- Build command: `npm run build`
+- Output: `dist`
+
+### Environment Variables (Production)
+Add `VITE_ELEVENLABS_AGENT_ID` in your hosting platform's environment settings.
+
+## 🔒 Security Notes
+
+- **Never commit** your `.env` file with real API keys
+- Use server-side authentication for production
+- Consider signed URLs for sensitive operations
+- ElevenLabs agent ID is public-facing (by design)
+
+## 🐛 Troubleshooting
+
+### Voice Not Working?
+
+1. **Check microphone permissions** in browser settings
+2. **Verify Agent ID** in `.env` file
+3. **Restart dev server** after changing `.env`
+4. **Use Chrome** for best compatibility
+5. **Check console** for error messages
+
+### Build Issues?
+
 ```bash
-# Import the project - Vite is auto-detected
+# Clean install
+rm -rf node_modules package-lock.json
+npm install
+npm run build
 ```
 
-### GitHub Pages
-```bash
-# Push dist folder to gh-pages branch
-```
+## 📚 Documentation
 
-### Static Hosting
-Upload the contents of the `dist/` folder to any web server.
+- **Quick Start**: See [QUICKSTART.md](./QUICKSTART.md)
+- **ElevenLabs Docs**: https://elevenlabs.io/docs
+- **React Docs**: https://react.dev
+- **Vite Docs**: https://vitejs.dev
 
-## 🖥️ Browser Support
+## 🎯 Features Roadmap
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
-## 🎨 Features Breakdown
-
-### Control Panel
-- Real-time robot status display
-- Battery level monitoring
-- Current and next location tracking
-- Cleaning progress visualization
-- Quick action buttons for common tasks
-- Voice assistant interface (UI only, for mobile app integration)
-
-### Map View
-**Live Status Tab:**
-- Interactive map visualization
-- Robot position tracking
-- Path completion indicators
-- Real-time progress updates
-
-**History Tab:**
-- Cleaning session history
-- Success/failure status
-- Duration and area coverage stats
-
-**Schedule Tab:**
-- Scheduled cleaning times
-- Cleaning types and locations
-- Status indicators
-
-## 🔒 Security
-
-- No sensitive data exposed in frontend
-- API calls should be proxied through backend (not implemented in demo)
-- Environment variables for configuration (when needed)
-
-## 📱 Responsive Design
-
-- Desktop: Full feature set with multi-column layout
-- Tablet: Optimized grid layout
-- Mobile: Single-column layout with touch-friendly controls
-- All devices: Fixed bottom navigation for easy access
-
-## 🎯 Performance
-
-- Small bundle size: 180KB JS (57KB gzipped)
-- Minimal CSS: 6.8KB (1.9KB gzipped)
-- Fast loading: Optimized with code splitting
-- Smooth animations: CSS-based with GPU acceleration
-
-## 🚧 Future Enhancements
-
-- Real WebRTC voice integration for web browsers
-- Real-time WebSocket connection to robot
-- Map canvas with actual floor plan rendering
-- Historical data charts and analytics
-- User authentication and profiles
-- Multi-robot management
+- ✅ Voice conversation with AI
+- ✅ Real-time transcription
+- ✅ Command detection
+- ✅ Robot control interface
+- ✅ Map visualization
+- ⏳ WebSocket robot connection
+- ⏳ Real-time telemetry
+- ⏳ User authentication
+- ⏳ Multi-robot support
+- ⏳ Analytics dashboard
 
 ## 📝 License
 
 Private
 
-## 🤝 Contributing
+## 🤝 Support
 
-This is a demonstration project. For production use, additional features like authentication, backend API, and real robot integration would be needed.
+For ElevenLabs API issues:
+- Docs: https://elevenlabs.io/docs/conversational-ai
+- Dashboard: https://elevenlabs.io/app
+
+---
+
+Built with ❤️ using React, TypeScript, and ElevenLabs AI
