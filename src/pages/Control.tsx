@@ -29,75 +29,110 @@ export default function Control() {
   const agentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
 
   // ElevenLabs conversation hook
-  const conversation = useConversation({
-    onConnect: () => {
-      console.log("✅ Connected to ElevenLabs");
-      setConversationText("");
-      setAssistantResponse("");
-      setIsCommandMode(false);
-    },
-    onDisconnect: () => {
-      console.log("❌ Disconnected from ElevenLabs");
-      // Clear silence timer on disconnect
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-        silenceTimerRef.current = null;
+   const conversation = useConversation({
+    onConnect: (conversationId: string) => {
+      console.log("✅ Connected to conversation", conversationId);
+      if (mountedRef.current) {
+        setIsListening(true);
+        setIsProcessing(false);
       }
     },
-    onMessage: (message) => {
-      console.log("📨 ElevenLabs Message:", message);
 
-      // Clear any existing silence timer when we get a message
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-        silenceTimerRef.current = null;
+    onDisconnect: (details: string) => {
+      setIsConnecting(false);
+      console.log("❌ Disconnected from conversation", details);
+      if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
+
+      if (mountedRef.current) {
+        setIsListening(false);
+        setIsProcessing(false);
+        pulseScale.value = withTiming(1);
+        waveScale.value = withTiming(1);
       }
+    },
 
-      // Handle user transcript
-      if (message.type === "user_transcript" && message.message) {
-        console.log("👤 User said:", message.message);
-        setConversationText(message.message);
+    onError: (message: string, context?: Record<string, unknown>) => {
+      console.error("❌ Conversation error:", message, context);
+      setIsConnecting(false);
+      if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
+
+      if (mountedRef.current) {
+        setIsListening(false);
+        setIsProcessing(false);
+        pulseScale.value = withTiming(1);
+        waveScale.value = withTiming(1);
+        // Alert.alert(
+        //   "Voice Error",
+        //   "There was an issue with the voice conversation. Please try again."
+        // );
       }
+    },
 
-      // Handle agent response
-      if (message.type === "agent_response" && message.message) {
-        console.log("🤖 AI responded:", message.message);
-        setAssistantResponse(message.message);
-        lastAIResponseTimeRef.current = Date.now();
+    onMessage: (event: any) => {
+      setIsConnecting(false);
+      console.log("📩 Raw event:", event);
 
-        // Check if the message contains a command
-        const msg = message.message.toLowerCase();
-        if (
-          msg.includes("clean") ||
-          msg.includes("start") ||
-          msg.includes("stop") ||
-          msg.includes("return") ||
-          msg.includes("bathroom") ||
-          msg.includes("schedule")
-        ) {
-          console.log("🎯 Command detected in AI response");
-          setIsCommandMode(true);
+      const type = event?.message?.type;
+      const source = event?.source ?? event?.role;
+
+      let message: string;
+
+      if (type === "user_transcript") {
+        // user’s spoken text
+        message = event.message.user_transcription_event.user_transcript;
+        console.log(`💬 Message from user:`, message);
+        setConversationText(message);
+        resetSilenceTimeout();
+      } else if (type === "agent_response") {
+        // AI’s reply
+        message = event.message.agent_response_event.agent_response;
+        console.log(`💬 Message from ai:`, message);
+        setAssistantResponse(message);
+        detectCommandMode(message);
+        if (detectCommandMode(message)) {
+          console.log("⚙️ Command detected — will end after 10 seconds");
+          resetSilenceTimeout();
         }
-
-        // Start 5-second silence timer after AI response
-        console.log("⏱️ Starting 5-second silence timer...");
-        silenceTimerRef.current = setTimeout(() => {
-          console.log("🔇 No user response for 5 seconds, ending session...");
-          conversation.endSession();
-        }, 5000);
+        setIsProcessing(false);
+      } else if (type === "agent_response_correction") {
+        message =
+          event.message.agent_response_correction_event
+            .corrected_agent_response;
+        console.log(`🪄 Corrected AI response:`, message);
+        setAssistantResponse(message);
+        detectCommandMode(message);
+        setIsProcessing(false);
+      } else {
+        // fallback
+        message = JSON.stringify(event);
+        console.log(`💬 Unknown message type:`, message);
       }
+    },
 
-      // Handle interruption (user started speaking)
-      if (message.type === "interruption") {
-        console.log("🎤 User started speaking, timer cleared");
-        if (silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-          silenceTimerRef.current = null;
+    onModeChange: (mode: "speaking" | "listening") => {
+      setIsConnecting(false);
+      console.log(`🔊 Mode: ${mode}`);
+      if (mountedRef.current) {
+        if (mode === "listening") {
+          setIsProcessing(false);
+          pulseScale.value = withRepeat(
+            withTiming(1.2, { duration: 800 }),
+            -1,
+            true
+          );
+        } else if (mode === "speaking") {
+          setIsProcessing(true);
+          waveScale.value = withRepeat(
+            withTiming(1.1, { duration: 600 }),
+            -1,
+            true
+          );
         }
       }
     },
-    onError: (error) => {
-      console.error("❌ ElevenLabs error:", error);
+
+    onStatusChange: (status: string) => {
+      console.log(`📡 Status: ${status}`);
     },
   });
 
