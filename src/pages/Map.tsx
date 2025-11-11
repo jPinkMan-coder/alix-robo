@@ -87,7 +87,7 @@ export default function Map() {
       duration: "25m",
       rooms: 2,
       toilet: "toilet",
-      positionLeft: "24%",
+      positionLeft: "10%",
       positionTop: "79%",
     },
     {
@@ -98,7 +98,7 @@ export default function Map() {
       duration: "30m",
       rooms: 1,
       toilet: "Toilet",
-      positionLeft: "97%",
+      positionLeft: "45%",
       positionTop: "60%",
     },
     {
@@ -108,7 +108,7 @@ export default function Map() {
       duration: "30m",
       rooms: 1,
       toilet: "Toilet",
-      positionLeft: "99%",
+      positionLeft: "45%",
       positionTop: "85%",
     },
   ]);
