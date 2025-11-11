@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Mic, MicOff, Zap } from "lucide-react";
 import { useConversation } from "@elevenlabs/react";
 
@@ -6,6 +6,9 @@ export default function Control() {
   const [conversationText, setConversationText] = useState("");
   const [assistantResponse, setAssistantResponse] = useState("");
   const [isCommandMode, setIsCommandMode] = useState(false);
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastAIResponseTimeRef = useRef<number>(0);
+
   const [robotStatus, setRobotStatus] = useState({
     currentLocation: "Main Bathroom",
     nextLocation: "Guest Bathroom",
@@ -28,44 +31,105 @@ export default function Control() {
   // ElevenLabs conversation hook
   const conversation = useConversation({
     onConnect: () => {
-      console.log("Connected to ElevenLabs");
+      console.log("✅ Connected to ElevenLabs");
+      setConversationText("");
+      setAssistantResponse("");
+      setIsCommandMode(false);
     },
     onDisconnect: () => {
-      console.log("Disconnected from ElevenLabs");
+      console.log("❌ Disconnected from ElevenLabs");
+      // Clear silence timer on disconnect
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
     },
     onMessage: (message) => {
-      console.log("ElevenLabs Message:", message);
+      console.log("📨 ElevenLabs Message:", message);
 
-      // Handle different message types
-      if (message.type === "user_transcript") {
-        setConversationText(message.message || "");
-      } else if (message.type === "agent_response") {
-        setAssistantResponse(message.message || "");
+      // Clear any existing silence timer when we get a message
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+
+      // Handle user transcript
+      if (message.type === "user_transcript" && message.message) {
+        console.log("👤 User said:", message.message);
+        setConversationText(message.message);
+      }
+
+      // Handle agent response
+      if (message.type === "agent_response" && message.message) {
+        console.log("🤖 AI responded:", message.message);
+        setAssistantResponse(message.message);
+        lastAIResponseTimeRef.current = Date.now();
 
         // Check if the message contains a command
-        const msg = (message.message || "").toLowerCase();
-        if (msg.includes("clean") || msg.includes("start") || msg.includes("stop") || msg.includes("return")) {
+        const msg = message.message.toLowerCase();
+        if (
+          msg.includes("clean") ||
+          msg.includes("start") ||
+          msg.includes("stop") ||
+          msg.includes("return") ||
+          msg.includes("bathroom") ||
+          msg.includes("schedule")
+        ) {
+          console.log("🎯 Command detected in AI response");
           setIsCommandMode(true);
+        }
+
+        // Start 5-second silence timer after AI response
+        console.log("⏱️ Starting 5-second silence timer...");
+        silenceTimerRef.current = setTimeout(() => {
+          console.log("🔇 No user response for 5 seconds, ending session...");
+          conversation.endSession();
+        }, 5000);
+      }
+
+      // Handle interruption (user started speaking)
+      if (message.type === "interruption") {
+        console.log("🎤 User started speaking, timer cleared");
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = null;
         }
       }
     },
     onError: (error) => {
-      console.error("ElevenLabs error:", error);
+      console.error("❌ ElevenLabs error:", error);
     },
   });
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+      }
+    };
+  }, []);
 
   const isListening = conversation.status === "connected";
 
   const executeCommand = () => {
+    console.log("⚡ Executing command:", assistantResponse);
     setRobotStatus((prev) => ({
       ...prev,
       isActive: true,
       cleaningProgress: 0,
       currentAction: "Executing voice command",
     }));
-    setConversationText("");
-    setAssistantResponse("");
-    setIsCommandMode(false);
+
+    // End the conversation after executing command
+    conversation.endSession();
+
+    // Clear messages after a short delay
+    setTimeout(() => {
+      setConversationText("");
+      setAssistantResponse("");
+      setIsCommandMode(false);
+    }, 1000);
   };
 
   const executeQuickAction = (actionType: string) => {
@@ -98,8 +162,10 @@ export default function Control() {
 
     try {
       if (isListening) {
+        console.log("🛑 Manually ending session");
         await conversation.endSession();
       } else {
+        console.log("🎙️ Starting voice conversation...");
         await conversation.startSession({ agentId });
       }
     } catch (error) {
@@ -240,18 +306,18 @@ export default function Control() {
               <span className="conversation-label">
                 {isCommandMode ? "Voice Command" : "Your Message"}
               </span>
-              <p className="conversation-text">
+              <p className="conversation-text" style={{ minHeight: '3rem' }}>
                 {conversationText || "Your voice input will appear here..."}
               </p>
             </div>
 
             <div className="response-container">
               <span className="response-label">Assistant Response</span>
-              <p className="response-text">
+              <p className="response-text" style={{ minHeight: '3rem' }}>
                 {assistantResponse || "AI assistant response will appear here..."}
               </p>
 
-              {isCommandMode && assistantResponse !== "" && (
+              {isCommandMode && assistantResponse && (
                 <button onClick={executeCommand} className="execute-button">
                   <Zap size={16} />
                   <span>Execute Command</span>
@@ -273,6 +339,8 @@ export default function Control() {
               <strong>Debug Info:</strong>
               <div>Status: {conversation.status}</div>
               <div>Agent ID: {agentId ? '✓ Configured' : '✗ Missing'}</div>
+              <div>Auto-disconnect: 5s after AI response</div>
+              <div>Command Mode: {isCommandMode ? '✓ Active' : '✗ Inactive'}</div>
             </div>
           )}
         </div>
